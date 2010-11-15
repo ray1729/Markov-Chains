@@ -1,0 +1,36 @@
+# Markov-Chains
+
+Clojure library for playing with Markov chains.
+
+## Usage
+
+(use '[ray1729.clojure.markov.core :only '(build-markov-model build-markov-chain)])
+
+(defn tokenize-line
+  [s]
+  "Split a line into word characters and append a trailing newline to the
+  sequence"
+  (when (seq s)
+    (re-seq #"[\w\n]" (str s "\n"))))
+
+(defn tokenize-file
+  [f]
+  "Split lines that begin with a lower-case letter into their component letters"
+  (with-open [r (reader f)]
+    (doall (apply concat (map tokenize-line (filter #(re-seq #"^[a-z]" %) (line-seq r)))))))
+  
+;; Build a 3-letter prefix map of /usr/share/dict-words
+(def m (build-markov-model (tokenize-file "/usr/share/dict/words") 3))
+  
+;; Generate a random "word" using the prefix map
+(apply str (take-while (partial not= "\n") (build-markov-chain m ["a" "b" "b"])))
+
+## Installation
+
+git clone git://github.com/ray1729/Markov-Chains.git
+
+## License
+
+Copyright (C) 2010 Ray Miller <ray@1729.org.uk>
+
+Distributed under the Eclipse Public License, the same as Clojure.
